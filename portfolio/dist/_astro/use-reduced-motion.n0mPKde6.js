@@ -1,0 +1,1 @@
+import{o as e,t}from"./react.Ca03aNmg.js";import{a as n,o as r,s as i}from"./features-animation.DuLTHPLo.js";var a=e(t(),1);function o(){!r.current&&n();let[e]=(0,a.useState)(i.current);return e}export{o as t};

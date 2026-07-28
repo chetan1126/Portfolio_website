@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Circuit Background — Preview</title>
+<style>
+  :root {
+    --ink: oklch(0.15 0 0);
+    --mist: oklch(0.30 0 0);
+    --coral: oklch(0.83 0.11 35);
+    --acid: oklch(0.92 0.09 122);
+    --sun: oklch(0.83 0.18 75);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--ink);
+    overflow: hidden;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  /* ---------- background stage ---------- */
+  .circuit-bg {
+    position: fixed;
+    inset: 0;
+    background: var(--ink);
+  }
+
+  /* faint PCB substrate dot-grid */
+  .circuit-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: -4px -4px;
+  }
+
+  .circuit-bg svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .trace {
+    fill: none;
+    stroke: oklch(1 0 0 / 0.14);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .pad {
+    fill: oklch(1 0 0 / 0.16);
+  }
+
+  .chip {
+    fill: oklch(1 0 0 / 0.045);
+    stroke: oklch(1 0 0 / 0.16);
+    stroke-width: 1.4;
+  }
+
+  .chip-pin {
+    stroke: oklch(1 0 0 / 0.16);
+    stroke-width: 1.4;
+  }
+
+  .led {
+    animation: blink 3.6s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 18% { opacity: 0.15; }
+    9% { opacity: 1; }
+    100% { opacity: 0.15; }
+  }
+
+  /* radial vignette so foreground content stays readable */
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 40%, transparent 0%, oklch(0.15 0 0 / 0.55) 62%, oklch(0.15 0 0 / 0.92) 100%);
+    pointer-events: none;
+  }
+
+  /* ---------- demo overlay content (delete this in production) ---------- */
+  .demo-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: oklch(0.97 0 0);
+    padding: 2rem;
+  }
+
+  .demo-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--coral);
+    font-weight: 700;
+    margin-bottom: 1.1rem;
+  }
+
+  .demo-tag::before {
+    content: "";
+    width: 0.6rem;
+    height: 0.6rem;
+    background: var(--coral);
+  }
+
+  .demo-title {
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    line-height: 0.95;
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .demo-title span { color: var(--coral); }
+
+  .demo-sub {
+    margin-top: 1.1rem;
+    max-width: 32rem;
+    color: oklch(0.97 0 0 / 0.65);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse, .led { animation: none !important; }
+    .pulse { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="circuit-bg">
+    <svg id="circuitSvg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+    <div class="vignette"></div>
+  </div>
+
+  <!-- Demo overlay: shows how the background reads with real content on top.
+       Remove this whole .demo-content block when you drop the background into your site. -->
+  <div class="demo-content">
+    <span class="demo-tag">Electronics &amp; Robotics Engineer</span>
+    <h1 class="demo-title">Chetan <span>Kotrange</span></h1>
+    <p class="demo-sub">
+      PCB design, embedded systems, and industrial automation —
+      background preview using your site's coral / acid / ink palette.
+    </p>
+  </div>
+
+  <script>
+    (function () {
+      const svg = document.getElementById("circuitSvg");
+      const NS = "http://www.w3.org/2000/svg";
+      const W = 1600, H = 900, GRID = 40;
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function snap(v) { return Math.round(v / GRID) * GRID; }
+      function rand(min, max) { return Math.random() * (max - min) + min; }
+      function choice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+      // Build an orthogonal (Manhattan-style) PCB trace as a random walk on the grid.
+      function buildTracePath(startX, startY, segments) {
+        let x = snap(startX), y = snap(startY);
+        const points = [[x, y]];
+        let lastAxis = Math.random() < 0.5 ? "h" : "v";
+
+        for (let i = 0; i < segments; i++) {
+          const axis = lastAxis === "h" ? "v" : "h";
+          const step = choice([1, 2, 3]) * GRID * choice([-1, 1]);
+          if (axis === "h") {
+            x = Math.min(Math.max(x + step, 40), W - 40);
+          } else {
+            y = Math.min(Math.max(y + step, 40), H - 40);
+          }
+          points.push([x, y]);
+          lastAxis = axis;
+        }
+        return points;
+      }
+
+      function pointsToPath(points) {
+        return points.map((p, i) => (i === 0 ? "M" : "L") + p[0] + "," + p[1]).join(" ");
+      }
+
+      function makeEl(tag, attrs) {
+        const el = document.createElementNS(NS, tag);
+        for (const k in attrs) el.setAttribute(k, attrs[k]);
+        return el;
+      }
+
+      const glowGroup = makeEl("g", {});
+      const filterDefs = makeEl("defs", {});
+      filterDefs.innerHTML =
+        '<filter id="glow" x="-200%" y="-200%" width="500%" height="500%">' +
+        '<feGaussianBlur stdDeviation="4" result="blur" />' +
+        '<feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+        "</filter>";
+      svg.appendChild(filterDefs);
+
+      const TRACE_COUNT = 24;
+      const pulseColors = ["oklch(0.83 0.11 35)", "oklch(0.92 0.09 122)", "oklch(0.83 0.18 75)"];
+      const traceData = [];
+
+      for (let i = 0; i < TRACE_COUNT; i++) {
+        const startX = rand(0, W);
+        const startY = rand(0, H);
+        const segments = Math.floor(rand(3, 7));
+        const points = buildTracePath(startX, startY, segments);
+        const d = pointsToPath(points);
+        const id = "trace-" + i;
+
+        const path = makeEl("path", { d, class: "trace", id });
+        svg.appendChild(path);
+
+        // pads at the endpoints
+        const start = points[0];
+        const end = points[points.length - 1];
+        svg.appendChild(makeEl("circle", { cx: start[0], cy: start[1], r: 3, class: "pad" }));
+        svg.appendChild(makeEl("circle", { cx: end[0], cy: end[1], r: 3, class: "pad" }));
+
+        traceData.push({ id, length: path.getTotalLength() });
+      }
+
+      // A handful of IC-style chips sitting on top of the trace network.
+      const chipCount = 5;
+      for (let i = 0; i < chipCount; i++) {
+        const cx = snap(rand(160, W - 160));
+        const cy = snap(rand(120, H - 120));
+        const cw = choice([80, 100, 120]);
+        const ch = choice([60, 80]);
+        const g = makeEl("g", {});
+        g.appendChild(makeEl("rect", {
+          x: cx - cw / 2, y: cy - ch / 2, width: cw, height: ch, rx: 4, class: "chip",
+        }));
+        const pins = 4;
+        for (let s = 0; s < pins; s++) {
+          const px = cx - cw / 2 + ((s + 1) * cw) / (pins + 1);
+          g.appendChild(makeEl("line", { x1: px, y1: cy - ch / 2 - 8, x2: px, y2: cy - ch / 2, class: "chip-pin" }));
+          g.appendChild(makeEl("line", { x1: px, y1: cy + ch / 2, x2: px, y2: cy + ch / 2 + 8, class: "chip-pin" }));
+        }
+        // status LED
+        g.appendChild(makeEl("circle", {
+          cx: cx + cw / 2 - 10, cy: cy - ch / 2 + 10, r: 3,
+          fill: choice(pulseColors), class: "led",
+          style: "animation-delay:" + rand(0, 3) + "s",
+        }));
+        svg.appendChild(g);
+      }
+
+      svg.appendChild(glowGroup);
+
+      // Traveling signal pulses along a subset of traces.
+      if (!reduceMotion) {
+        const pulseTraces = traceData.sort(() => Math.random() - 0.5).slice(0, 10);
+        pulseTraces.forEach((t, i) => {
+          const color = pulseColors[i % pulseColors.length];
+          const circle = makeEl("circle", {
+            r: 3.2, fill: color, class: "pulse", filter: "url(#glow)",
+          });
+          glowGroup.appendChild(circle);
+
+          const animMotion = makeEl("animateMotion", {
+            dur: rand(3.5, 7).toFixed(2) + "s",
+            repeatCount: "indefinite",
+            begin: rand(0, 4).toFixed(2) + "s",
+          });
+          const mpath = makeEl("mpath", {});
+          mpath.setAttributeNS("http://www.w3.org/1999/xlink", "href", "#" + t.id);
+          animMotion.appendChild(mpath);
+          circle.appendChild(animMotion);
+
+          const animOpacity = makeEl("animate", {
+            attributeName: "opacity",
+            values: "0;1;1;0",
+            keyTimes: "0;0.05;0.9;1",
+            dur: animMotion.getAttribute("dur"),
+            repeatCount: "indefinite",
+            begin: animMotion.getAttribute("begin"),
+          });
+          circle.appendChild(animOpacity);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,7 +1,6 @@
 import ThemeToggle from "./ui/theme-toggle";
 import { personalInfo } from "@/lib/data";
 import {
-  ArrowUpRight01Icon,
   Cancel01Icon,
   DocumentAttachmentIcon,
   Menu01Icon,
@@ -123,12 +122,6 @@ export default function GlassHeader() {
               <span>Resume</span>
               <span className="flex items-center gap-1.5 bg-ink px-2.5 py-1.5 font-sans text-xs font-black tracking-normal text-white">
                 PDF
-                <HugeiconsIcon
-                  icon={ArrowUpRight01Icon}
-                  className="h-3.5 w-3.5"
-                  strokeWidth={2}
-                  aria-hidden="true"
-                />
               </span>
             </a>
           </nav>

@@ -1,5 +1,5 @@
 import { personalInfo } from "@/lib/data";
-import { ArrowUpRight01Icon, Cancel01Icon, Download04Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, Download04Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, domAnimation, LazyMotion, m } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -63,7 +63,7 @@ export default function ResumeModal() {
               exit={{ opacity: 0, y: 16, scale: 0.98 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="flex items-center justify-between gap-4 border-b-2 border-ink bg-coral px-5 py-4 text-ink">
+              <div className="flex items-center justify-between gap-4 bg-coral px-5 py-4 text-ink">
                 <div className="min-w-0">
                   <p className="truncate font-display text-lg leading-none md:text-xl">
                     {personalInfo.name} — Resume
@@ -73,7 +73,7 @@ export default function ResumeModal() {
                   <a
                     href={personalInfo.resume}
                     download
-                    className="inline-flex h-10 items-center gap-2 border border-ink/60 bg-background px-3 text-xs font-bold text-ink transition-colors hover:bg-ink hover:text-white"
+                    className="inline-flex h-10 items-center gap-2 border border-foreground/20 bg-background px-3 text-xs font-bold text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background"
                   >
                     <HugeiconsIcon
                       icon={Download04Icon}
@@ -87,14 +87,8 @@ export default function ResumeModal() {
                     href={personalInfo.resume}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hidden h-10 items-center gap-2 border border-ink/60 bg-background px-3 text-xs font-bold text-ink transition-colors hover:bg-ink hover:text-white sm:inline-flex"
+                    className="hidden h-10 items-center gap-2 border border-foreground/20 bg-background px-3 text-xs font-bold text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background sm:inline-flex"
                   >
-                    <HugeiconsIcon
-                      icon={ArrowUpRight01Icon}
-                      className="h-4 w-4"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    />
                     Open in new tab
                   </a>
                   <button

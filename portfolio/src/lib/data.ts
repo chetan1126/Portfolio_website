@@ -7,6 +7,7 @@ export const personalInfo = {
   phone: "+91 8888627008",
   location: "Chandrapur, Maharashtra, India",
   linkedin: "https://www.linkedin.com/in/chetan-kotrange-88665022b",
+  github: "https://github.com/chetan1126",
   resume: "/Chetan_Kotrange_CV.pdf",
   profilePicture: "/Profile_photo.png",
   heroDescription:
