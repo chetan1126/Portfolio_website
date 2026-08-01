@@ -2,7 +2,19 @@ import { selectedWork } from "@/lib/data";
 import MotionWrapper from "./MotionWrapper";
 import SectionHeading from "./SectionHeading";
 
-function ProjectArtwork({ index }: { index: number }) {
+function ProjectArtwork({ project, index }: { project: any; index: number }) {
+  if (project.photo) {
+    return (
+      <div className="relative aspect-4/3 overflow-hidden bg-background">
+        <img
+          src={project.photo}
+          alt={project.photoAlt ?? `${project.title} project photo`}
+          className="h-full w-full object-contain object-center"
+        />
+      </div>
+    );
+  }
+
   if (index === 1) {
     return (
       <div className="relative aspect-4/3 overflow-hidden bg-background">
@@ -61,7 +73,41 @@ export default function ProjectsSection() {
             <MotionWrapper key={project.title} delay={index * 0.08}>
               <article className="grid items-center gap-8 md:grid-cols-2 md:items-start md:gap-14">
                 <div className={index % 2 ? "md:order-2" : ""}>
-                  <ProjectArtwork index={index} />
+                  <ProjectArtwork project={project} index={index} />
+                  {(project.documentLink || project.videoLink || project.repoLink) && (
+                    <div className="mt-6 flex flex-wrap gap-3 md:mt-8">
+                      {project.documentLink ? (
+                        <a
+                          href={project.documentLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:border-ember hover:text-ember"
+                        >
+                          View documentation
+                        </a>
+                      ) : null}
+                      {project.videoLink ? (
+                        <a
+                          href={project.videoLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:border-ember hover:text-ember"
+                        >
+                          Watch video
+                        </a>
+                      ) : null}
+                      {project.repoLink ? (
+                        <a
+                          href={project.repoLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:border-ember hover:text-ember"
+                        >
+                          View repo
+                        </a>
+                      ) : null}
+                    </div>
+                  )}
                   {project.videoId ? (
                     <div className="mt-6 overflow-hidden rounded-3xl border border-border bg-background shadow-sm md:mt-8 md:max-w-2xl">
                       <div className="relative aspect-video bg-black mx-auto max-w-xl md:max-w-2xl">
